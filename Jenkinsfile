@@ -6,19 +6,16 @@ pipeline {
         DOCKER_CREDENTIALS = credentials('docker-hub')  
         DOCKER_USER = "${DOCKER_CREDENTIALS_USR}"
         DOCKER_PASS = "${DOCKER_CREDENTIALS_PSW}"
-        
+
         // Nom de l'image Docker
-        IMAGE_NAME = "ton-nom-utilisateur-docker/mon-app"
+        IMAGE_NAME = 'ramaseck2/java-devops'
     }
 
     stages {
         stage('Checkout') {
             steps {
-                git(
-                    branch: 'main',
-                    url: 'https://github.com/seckrama/java-devops.git',
-                    credentialsId: 'github-token'
-                )
+                // Utilise le SCM configuré dans le job Jenkins
+                checkout scm
             }
         }
 
@@ -51,7 +48,8 @@ pipeline {
 
     post {
         always {
-            sh 'docker logout'
+            // Toujours se déconnecter de Docker
+            sh 'docker logout || true'
         }
         success {
             echo "Pipeline terminé avec succès et l'image Docker a été poussée !"
