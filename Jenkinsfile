@@ -2,13 +2,7 @@ pipeline {
     agent any
 
     environment {
-        // Credentials Docker Hub
-        DOCKER_CREDENTIALS = credentials('docker-hub')  
-        DOCKER_USER = "${DOCKER_CREDENTIALS_USR}"
-        DOCKER_PASS = "${DOCKER_CREDENTIALS_PSW}"
-        
-        // Nom de l'image Docker
-        IMAGE_NAME = "ton-nom-utilisateur-docker/mon-app"
+        IMAGE_NAME = "seckrama/mon-app" // Remplace par ton nom d'utilisateur Docker Hub
     }
 
     stages {
@@ -34,30 +28,25 @@ pipeline {
             }
         }
 
-        stage('Docker Login') {
+        stage('Docker Login & Push') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'docker-hub', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                    sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
+                    sh """
+                        echo \$DOCKER_PASS | docker login -u \$DOCKER_USER --password-stdin
+                        docker push ${IMAGE_NAME}:latest
+                        docker logout
+                    """
                 }
-            }
-        }
-
-        stage('Docker Push') {
-            steps {
-                sh "docker push ${IMAGE_NAME}:latest"
             }
         }
     }
 
     post {
-        always {
-            sh 'docker logout'
-        }
         success {
-            echo "Pipeline terminé avec succès et l'image Docker a été poussée !"
+            echo "Pipeline terminée avec succès ! L'image Docker a été poussée."
         }
         failure {
-            echo "La pipeline a échoué. Vérifie les logs."
+            echo "La pipeline a échoué. Vérifie les logs pour les erreurs."
         }
     }
 }
