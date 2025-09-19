@@ -11,7 +11,7 @@ pipeline {
                 git(
                     branch: 'main',
                     url: 'https://github.com/seckrama/java-devops.git',
-                    credentialsId: 'github-credentials'
+                    credentialsId: 'github-token'
                 )
             }
         }
