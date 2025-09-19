@@ -2,9 +2,15 @@ FROM jenkins/jenkins:lts
 
 USER root
 
-# Installer Docker CLI et Maven
+# Installer Docker
 RUN apt-get update && \
-    apt-get install -y maven docker.io && \
+    apt-get install -y apt-transport-https ca-certificates curl gnupg lsb-release && \
+    curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg && \
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/debian $(lsb_release -cs) stable" > /etc/apt/sources.list.d/docker.list && \
+    apt-get update && apt-get install -y docker-ce-cli docker-compose && \
     rm -rf /var/lib/apt/lists/*
+
+# Installer Maven
+RUN apt-get update && apt-get install -y maven
 
 USER jenkins
