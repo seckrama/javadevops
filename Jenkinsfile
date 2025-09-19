@@ -2,7 +2,13 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = "seckrama/mon-app" // Remplace par ton nom d'utilisateur Docker Hub
+        // Credentials Docker Hub
+        DOCKER_CREDENTIALS = credentials('docker-hub')  
+        DOCKER_USER = "${DOCKER_CREDENTIALS_USR}"
+        DOCKER_PASS = "${DOCKER_CREDENTIALS_PSW}"
+        
+        // Nom de l'image Docker
+        IMAGE_NAME = "ton-nom-utilisateur-docker/mon-app"
     }
 
     stages {
@@ -11,7 +17,7 @@ pipeline {
                 git(
                     branch: 'main',
                     url: 'https://github.com/seckrama/java-devops.git',
-                    credentialsId: 'github-token'
+                    credentialsId: 'github-credentials'
                 )
             }
         }
@@ -28,25 +34,30 @@ pipeline {
             }
         }
 
-        stage('Docker Login & Push') {
+        stage('Docker Login') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'docker-hub', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                    sh """
-                        echo \$DOCKER_PASS | docker login -u \$DOCKER_USER --password-stdin
-                        docker push ${IMAGE_NAME}:latest
-                        docker logout
-                    """
+                    sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
                 }
+            }
+        }
+
+        stage('Docker Push') {
+            steps {
+                sh "docker push ${IMAGE_NAME}:latest"
             }
         }
     }
 
     post {
+        always {
+            sh 'docker logout'
+        }
         success {
-            echo "Pipeline terminée avec succès ! L'image Docker a été poussée."
+            echo "Pipeline terminé avec succès et l'image Docker a été poussée !"
         }
         failure {
-            echo "La pipeline a échoué. Vérifie les logs pour les erreurs."
+            echo "La pipeline a échoué. Vérifie les logs."
         }
     }
 }
