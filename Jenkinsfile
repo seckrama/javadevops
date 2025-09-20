@@ -8,7 +8,7 @@ pipeline {
         DOCKER_PASS = "${DOCKER_CREDENTIALS_PSW}"
         
         // Nom de l'image Docker
-        IMAGE_NAME = "ramaseck2r/java-devops"
+        IMAGE_NAME = "ramaseck2/java-devops"
     }
 
     stages {
@@ -21,6 +21,7 @@ pipeline {
                 )
             }
         }
+
 
         stage('Build Maven') {
             steps {
@@ -61,3 +62,5 @@ pipeline {
         }
     }
 }
+
+
